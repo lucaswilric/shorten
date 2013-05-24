@@ -17,12 +17,12 @@ http://localhost:5000/1
 Get the list of shortened URLs:
 
 ```bash
-$ curl -i http://localhost:5000/1
+$ curl -i http://localhost:5000/urls
 
-HTTP/1.1 302 Moved Temporarily
-content-type: text/plain
-location: http://google.com/
-Date: Sun, 28 Apr 2013 05:45:20 GMT
+HTTP/1.1 200 OK
+Date: Fri, 24 May 2013 11:29:20 GMT
 Connection: keep-alive
 Transfer-Encoding: chunked
+
+{"1":"http://github.com/lucaswilric/shorten","2":"http://blog.lucasrichter.id.au/"}
 ```
