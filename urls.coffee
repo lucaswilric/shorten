@@ -42,7 +42,7 @@ exports.with_max_key = (_callback) ->
           if err?
             console.log err
           else
-            _callback(result[0].key)
+            _callback(if result.length > 0 then result[0].key else '')
 
 exports.count = (_callback) ->
   mongo.MongoClient.connect mongo_url, (err, client) ->
