@@ -3,31 +3,32 @@ require('./array-utils.coffee')
 
 tr = require('./text-respond.coffee')
 
-urls = {}
+urls = require('./urls.coffee')
 
-get_key = () ->
+get_key = (callback) ->
   # Find the highest existing key
-  keys = Object.keys(urls)
-  maxKey = (if keys.length > 0 then keys.max() else '').toString()
-  # Increment it
-  newKey = maxKey.inc()
-  # Check it doesn't already exist
-  check = urls[newKey]
-  return get_key() if check? or newKey in ['new', 'urls']
-  # Assign it
-  return newKey
+  urls.with_max_key (key) ->
+    newKey = (key || '').inc()
+    # Check it doesn't already exist
+    urls.find newKey, (docs) ->
+      newKey = newKey.inc() if docs.length > 0 or newKey in ['new', 'urls']
+      # Assign it
+      callback(newKey)
 
-create_url = (req) ->
-  k = get_key()
-  urls[k] = req.body.url
-  'http://' + req.headers['host'] + '/' + k
+create_url = (req, res) ->
+  get_key (k) ->
+    urls.save k, req.body.url, (err, result) ->
+      if err?
+        tr.error(res, 'Error while saving')
+      else
+        res.end("http://#{ req.headers['host'] }/#{ result.key }")
 
-find = (res, url) ->
-  longUrl = urls[url.substring(1,url.length)]
-  if longUrl?
-    tr.found(res, longUrl)
-  else
-    tr.not_found(res)
+redirect = (res, url) ->
+  urls.find url.substring(1,url.length), (docs) ->
+    if docs.length > 0
+      tr.found(res, docs[0].url)
+    else
+      tr.not_found(res)
 
 exports.route = (req, res) ->
   switch req.method
@@ -35,15 +36,17 @@ exports.route = (req, res) ->
       switch req.url
         when '/new' 
           if req.body.url?
-            res.end(create_url(req))
+            create_url(req,res)
           else
             tr.bad_request(res, 'Parameter `url` is required.')
-        else tr.not_found(res)
+        else 
+          tr.not_found(res)
     when 'GET'
       switch req.url
         when '/new'
           tr.bad_request(res, 'You need to POST to this URL.')
         when '/urls'
-          res.end(JSON.stringify(urls))
+          urls.all (docs) ->
+            res.end(JSON.stringify(docs))
         else
-          find(res, req.url)
+          redirect(res, req.url)

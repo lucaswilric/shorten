@@ -5,7 +5,7 @@ String::revReplace = (old, new_) ->
   return this.reverse().replace(old, new_).reverse()
 
 String::inc = () ->
-  legend = "0123456789abcdefghijklmnopqrstuvwxyz"
+  legend = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
   return legend[0] if this == ''
   newStr = new String(this).toString()
   lastChar = newStr.charAt(newStr.length-1)
