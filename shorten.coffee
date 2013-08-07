@@ -15,7 +15,7 @@ get_key = (callback) ->
       # Assign it
       callback(newKey)
 
-create_url = (req, res) ->
+exports.create_url = (req, res) ->
   get_key (k) ->
     urls.save k, req.body.url, (err, result) ->
       if err?
@@ -23,30 +23,15 @@ create_url = (req, res) ->
       else
         res.end("http://#{ req.headers['host'] }/#{ result.key }")
 
-redirect = (res, url) ->
+exports.redirect = (req, res) ->
+  url = req.url
+  next('route') if '/urls' == url
   urls.find url.substring(1,url.length), (docs) ->
     if docs.length > 0
       tr.found(res, docs[0].url)
     else
       tr.not_found(res)
 
-exports.route = (req, res) ->
-  switch req.method
-    when 'POST'
-      switch req.url
-        when '/new' 
-          if req.body.url?
-            create_url(req,res)
-          else
-            tr.bad_request(res, 'Parameter `url` is required.')
-        else 
-          tr.not_found(res)
-    when 'GET'
-      switch req.url
-        when '/new'
-          tr.bad_request(res, 'You need to POST to this URL.')
-        when '/urls'
-          urls.all (docs) ->
-            res.end(JSON.stringify(docs))
-        else
-          redirect(res, req.url)
+exports.all_urls = (req, res) ->
+  urls.all (docs) ->
+    res.end(JSON.stringify(docs))

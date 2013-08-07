@@ -1,0 +1,11 @@
+extends layout
+
+block content
+  h1= title
+  form(action='/new', method='POST', id='shorten')
+    p
+      label(for='url') Shorten a URL: 
+      input(type='text', name='url', id='url')
+      input(type='submit', value='Go!')
+
+  h2#short-url
