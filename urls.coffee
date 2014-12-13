@@ -1,4 +1,4 @@
-mongo_url = process.env.MONGOHQ_URL || 'mongodb://127.0.0.1:27017/shorten'
+mongo_url = process.env.MONGOHQ_URL || process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/shorten'
 mongo = require('mongodb')
 
 findInternal = (query, _callback) ->
